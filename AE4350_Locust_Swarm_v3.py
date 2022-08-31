@@ -18,7 +18,7 @@ det_range   = 80                            # visible range of locust
 det_rng_pred= 80                            # Visible range of predator
 avoid_pred  = 0.01                          # looming cue threshold when avoidance of predators kicks in
 loc_rate    = 0.6                           # Locust rate = how much the locust speed vs the desired speed weighs
-flee_rate   = 0.6                           # Flee rate = how much the predator avoid speed vs the ... speed weighs
+flee_rate   = 0.6                           # Flee rate = how much the predator avoid speed vs the original speed weighs
 n_locusts   = 100
 n_predators = 2
 locusts     = []
@@ -100,6 +100,7 @@ while t <= max_time:
         # normalise looming_cue
         looming_cue = looming_cue_unnorm / np.linalg.norm(looming_cue_unnorm)
         #endregion
+        
         #region -- Centroid: Calculate the average centroid of the swarm
         centroid = np.zeros([1, 3])
         if close_loc_norm == 0:
@@ -183,10 +184,10 @@ while t <= max_time:
 
         # New speed, avoiding predators:
         if pred_count !=0:
-            zw = (- np.sum(looming_cue) * centroid * (1-loc_rate) + loc_rate* (locust[:, 1]/(np.linalg.norm(locust[:, 1]))))*max_l_speed
+            zw = (- np.sum(looming_cue) * centroid_dir * (1-loc_rate) + loc_rate* (locust[:, 1]/(np.linalg.norm(locust[:, 1]))))*max_l_speed
             locust[:, 1] = (1-flee_rate) * zw + flee_rate*flee_dir*flee_speed
         else:
-            locust[:, 1] = (- np.sum(looming_cue) * centroid * (1-loc_rate) + loc_rate* (locust[:, 1]/(np.linalg.norm(locust[:, 1]))))*max_l_speed
+            locust[:, 1] = (- np.sum(looming_cue) * centroid_dir * (1-loc_rate) + loc_rate* (locust[:, 1]/(np.linalg.norm(locust[:, 1]))))*max_l_speed
 
         # new position based on old position and previous velocity*timestep
         locust[:, 0] += locust[:, 1] * dt
@@ -239,17 +240,28 @@ while t <= max_time:
     # set limits anew, because everything cleared
     # ax.set_xlim(-display_x*3, display_x *3)
     # ax.set_ylim(-display_y*3, display_y *3)
-    # ax.set_zlim(-display_z*3, display_z *3)   
-    # plot new positions 
-    ax.scatter([item[0,0] for item in locusts],
-            [item[1,0] for item in locusts],
-            [item[2,0] for item in locusts])
+    # ax.set_zlim(-display_z*3, display_z *3)  
+    ax.set_xlabel('x') 
+    ax.set_ylabel('y') 
+    ax.set_zlabel('z') 
+
+    # plot new positions without history
+    for item in locusts:
+        ax.scatter(item[0,0], item[1,0], item[2,0], color='green')
+    for item in predators:
+        ax.scatter(item[0,0], item[1,0], item[2,0], color='red')
     
-    ax.scatter([item[0,0] for item in predators],
-            [item[1,0] for item in predators],
-            [item[2,0] for item in predators])
+    # # if history desired use the below scatter plot (takes slightly longer, but has better colouring)
+    # ax.scatter([item[0,0] for item in locusts],
+    #         [item[1,0] for item in locusts],
+    #         [item[2,0] for item in locusts])
+    
+    # ax.scatter([item[0,0] for item in predators],
+    #         [item[1,0] for item in predators],
+    #         [item[2,0] for item in predators])
+
     # wait to see image
-    plt.pause(0.5)
+    plt.pause(0.0000000001)
     # clear all data for next positions
     ax.clear()
     # update time

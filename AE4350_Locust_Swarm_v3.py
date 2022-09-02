@@ -25,7 +25,7 @@ max_l_speed = 10                            # max locust speed
 max_p_speed = 20                            # max predator speed
 det_range   = 80                            # visible range of locust
 det_rng_pred= 80                            # Visible range of predator
-avoid_pred  = 0.001                          # looming cue threshold when avoidance of predators kicks in
+avoid_pred  = 0.01                          # looming cue threshold when avoidance of predators kicks in
 loc_rate    = 0.6                           # Locust rate = how much the locust speed vs the desired speed weighs
 flee_rate   = 0.6                           # Flee rate = how much the predator avoid speed vs the original speed weighs
 n_locusts   = 100

@@ -2,8 +2,17 @@
 # -*- coding: utf-8 -*-
 # 
 
+from random import seed
 import matplotlib.pyplot as plt
 import numpy as np
+import random
+import sys
+
+set_seed = 10000
+# 1000 = nice, separating due to predator into two flocks
+
+# 10 = circly, 43 = sort of 2 flocks,  0 = 3 flockys, 100 = line between two predators
+np.random.seed(set_seed)
 
 max_time    = 100
 dt          = 0.1
@@ -16,7 +25,7 @@ max_l_speed = 10                            # max locust speed
 max_p_speed = 20                            # max predator speed
 det_range   = 80                            # visible range of locust
 det_rng_pred= 80                            # Visible range of predator
-avoid_pred  = 0.01                          # looming cue threshold when avoidance of predators kicks in
+avoid_pred  = 0.001                          # looming cue threshold when avoidance of predators kicks in
 loc_rate    = 0.6                           # Locust rate = how much the locust speed vs the desired speed weighs
 flee_rate   = 0.6                           # Flee rate = how much the predator avoid speed vs the original speed weighs
 n_locusts   = 100
@@ -100,7 +109,6 @@ while t <= max_time:
         # normalise looming_cue
         looming_cue = looming_cue_unnorm / np.linalg.norm(looming_cue_unnorm)
         #endregion
-        
         #region -- Centroid: Calculate the average centroid of the swarm
         centroid = np.zeros([1, 3])
         if close_loc_norm == 0:
@@ -156,9 +164,9 @@ while t <= max_time:
         #region - Calculate speed direction and magnitude:
         flee_dir = np.zeros([1, 3])
         pred_count = 0
-        for t in range(len(close_pred)):
-            if lc_pred[t] >= avoid_pred:
-                flee_dir -= close_pred_norm[t][:, 0]
+        for z in range(len(close_pred)):
+            if lc_pred[z] >= avoid_pred:
+                flee_dir -= close_pred_norm[z][:, 0]
                 pred_count +=1
         if np.sum(flee_dir) == 0:
             pass
@@ -209,17 +217,17 @@ while t <= max_time:
                 close_prey.append(prey)
         
         # Find closest prey/locust:
-        my_prey_dir = predator[:, 0]
+        prey_dir = predator[:, 0]
         cl_count = 0
         for prey in rel_prey:
             prey_dist = np.linalg.norm(prey[:, 0])
             if prey_dist <= det_rng_pred:
                 if cl_count == 0:
-                    my_prey_dir = prey[:, 0]
-                elif cl_count > 0 and np.linalg.norm(my_prey_dir[:]) > prey_dist :
-                    my_prey_dir = prey[:, 0]
+                    prey_dir = prey[:, 0]
+                elif cl_count > 0 and np.linalg.norm(prey_dir[:]) > prey_dist :
+                    prey_dir = prey[:, 0]
                 cl_count += 1
-        my_prey_dir /= np.linalg.norm(my_prey_dir)
+        prey_dir /= np.linalg.norm(prey_dir)
 
         # Calculate centroid of prey swarm
         prey_centroid = np.zeros([1, 3])
@@ -230,7 +238,7 @@ while t <= max_time:
         #endregion
 
         # Update preadator direction and go at max speed:
-        predator[:, 1] = my_prey_dir * max_p_speed              # go for closest locust
+        predator[:, 1] = prey_dir * max_p_speed              # go for closest locust
         # predator[:, 1] = prey_centroid * max_p_speed          # go for swarm/where most prey is
 
         # Update position
@@ -266,5 +274,6 @@ while t <= max_time:
     ax.clear()
     # update time
     t += dt
+    print(t)
 
 plt.show()
